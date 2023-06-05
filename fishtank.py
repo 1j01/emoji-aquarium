@@ -1,15 +1,11 @@
 #!/usr/bin/env python3
 import random
-import time
-
-# Escape sequence helpers
-def set_background_color(row, color):
-    """Draw a row of the background color gradient"""
-    print(f"\033[{row+1};1H\033[48;2;{color[0]};{color[1]};{color[2]}m\033[K", end='')
-
-def reset_color():
-    """Reset the color to default"""
-    print("\033[0m")
+from rich.segment import Segment
+from rich.style import Style
+from textual.app import App, ComposeResult
+from textual.color import Color
+from textual.strip import Strip
+from textual.widget import Widget
 
 # Class hierarchy for entities
 class Entity:
@@ -20,9 +16,6 @@ class Entity:
 
     def move(self):
         pass
-
-    def draw(self):
-        print(f"\033[{self.y+1};{self.x+1}H{self.symbol}")
 
 class Fish(Entity):
     def __init__(self, x, y):
@@ -86,29 +79,46 @@ seaweed = [Seaweed(random.randint(0, 79), random.randint(0, 23)) for _ in range(
 bubbles = []
 
 # Define gradient colors
-light_blue = (135, 206, 250)
-dark_blue = (25, 25, 112)
+light_blue = Color(135, 206, 250)
+dark_blue = Color(25, 25, 112)
 
-# Clear the screen
-print("\033[2J")
+def all_entities():
+    return fish + sea_urchins + seaweed + bubbles
 
-# Main loop
-while True:
-    # Set the background color for each row with a gradient
-    for row in range(24):
-        color = [
-            int(light_blue[c] + (dark_blue[c] - light_blue[c]) * (row / 24))
-            for c in range(3)
-        ]
-        set_background_color(row, color)
-
-    # Move and draw entities
-    for entity in fish + sea_urchins + seaweed + bubbles:
+def step():
+    # Move entities
+    for entity in all_entities():
         entity.move()
-        entity.draw()
 
-    # Reset the color to default
-    reset_color()
+class Tank(Widget):
+    def render_line(self, y: int) -> Strip:
+        """Render a line of the widget."""
+        bg_color = light_blue.blend(dark_blue, y / self.size.height)
+        bg_style = Style(bgcolor=bg_color.rich_color)
+        entities_at_y = [entity for entity in all_entities() if entity.y == y]
+        entities_at_y.sort(key=lambda entity: entity.x)
+        segments = []
+        x = 0
+        for entity in entities_at_y:
+            new_x = entity.x
+            segments.append(Segment(" " * (new_x - x), bg_style, None))
+            segments.append(Segment(entity.symbol, bg_style, None))
+            x = new_x + 1
+        segments.append(Segment(" " * (self.size.width - x), bg_style, None))
+        return Strip(segments)
 
-    # Sleep for a short while to control the speed
-    time.sleep(0.1)
+class FishTankApp(App):
+    def update(self):
+        step()
+        self.query_one(Tank).refresh()
+
+    def on_mount(self):
+        self.set_interval(0.1, self.update)
+
+    def compose(self) -> ComposeResult:
+        yield Tank()
+
+app = FishTankApp()
+
+if __name__ == "__main__":
+    app.run()
