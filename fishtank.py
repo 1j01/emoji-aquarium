@@ -2,6 +2,15 @@
 import random
 import time
 
+# Escape sequence helpers
+def set_background_color(row, color):
+    """Draw a row of the background color gradient"""
+    print(f"\033[{row+1};1H\033[48;2;{color[0]};{color[1]};{color[2]}m\033[K", end='')
+
+def reset_color():
+    """Reset the color to default"""
+    print("\033[0m")
+
 # Class hierarchy for entities
 class Entity:
     def __init__(self, x, y, symbol):
@@ -14,12 +23,6 @@ class Entity:
 
     def draw(self):
         print(f"\033[{self.y+1};{self.x+1}H{self.symbol}")
-
-def set_background_color(row, color):
-    print(f"\033[{row+1};1H\033[48;2;{color[0]};{color[1]};{color[2]}m\033[K", end='')
-
-def reset_color():
-    print("\033[0m")
 
 class Fish(Entity):
     def __init__(self, x, y):
