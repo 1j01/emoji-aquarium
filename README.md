@@ -41,3 +41,8 @@ Run with `python fishtank.py`
 ## License
 
 [MIT](LICENSE.txt)
+
+## See Also
+
+[asciiquarium](https://github.com/cmatsuoka/asciiquarium), similar idea but using ASCII instead of emoji
+
