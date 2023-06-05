@@ -96,6 +96,10 @@ class Bubble(Entity):
     def move(self):
         self.y -= 1
 
+        # Move sideways occasionally
+        if random.random() < 0.1:
+            self.x += random.choice([-1, 1])
+
         # Remove the bubble if it reaches the top of the tank
         if self.y < 0:
             bubbles.remove(self)
