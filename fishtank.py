@@ -9,10 +9,11 @@ from textual.widget import Widget
 
 # Class hierarchy for entities
 class Entity:
-    def __init__(self, x, y, symbol):
+    def __init__(self, x, y, symbol, color=Color(255, 255, 255)):
         self.x = x
         self.y = y
         self.symbol = symbol
+        self.color = color
 
     def move(self):
         pass
@@ -55,11 +56,30 @@ class SeaUrchin(Entity):
             self.y = 0
 
 class Seaweed(Entity):
-    def __init__(self, x, y):
+    def __init__(self, x, y, seaweed_below=None):
         super().__init__(x, y, '🌿')
+        self.seaweed_below = seaweed_below
+        self.seaweed_above = None
 
     def move(self):
-        pass
+        # Wiggle back and forth, within 1 space of the seaweed below and above
+        if self.seaweed_below is not None:
+            new_x = self.x + random.randint(-1, 1)
+            # constrain to the range of the seaweed below
+            new_x = max(new_x, self.seaweed_below.x - 1)
+            new_x = min(new_x, self.seaweed_below.x + 1)
+            # constrain to the range of the seaweed above
+            if self.seaweed_above is not None:
+                new_x = max(new_x, self.seaweed_above.x - 1)
+                new_x = min(new_x, self.seaweed_above.x + 1)
+            self.x = new_x
+
+        # Create new seaweed above if there is room
+        growth_rate = 0.01
+        if self.y > 0 and random.random() < growth_rate and self.seaweed_above is None:
+            new_seaweed = Seaweed(self.x, self.y - 1, self)
+            seaweed.append(new_seaweed)
+            self.seaweed_above = new_seaweed
 
 class Bubble(Entity):
     def __init__(self, x, y):
