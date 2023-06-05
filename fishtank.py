@@ -120,10 +120,20 @@ class Tank(Widget):
         segments = []
         x = 0
         for entity in entities_at_y:
+            # visualize segments by color (kind of unpleasant to look at,
+            # at full simulation speed; maybe slow it down to debug.)
+            # bg_color = light_blue.blend(dark_blue, x / self.size.width)
+            # bg_style = Style(bgcolor=bg_color.rich_color)
             new_x = entity.x
             segments.append(Segment(" " * (new_x - x), bg_style, None))
-            segments.append(Segment(entity.symbol, bg_style, None))
-            x = new_x + 1
+            entity_segment = Segment(entity.symbol, bg_style, None)
+            segments.append(entity_segment)
+            x = new_x + entity_segment.cell_length
+            # Using cell_length is more accurate than just adding 1 to x,
+            # but there's still issues with overlapping entities.
+            # If an emoji is 2 cells wide, and you have entities in every cell
+            # within the left half of the screen, the whole screen will be filled.
+            # TODO: hide entities that overlap instead of allowing it to shift things rightwards.
         segments.append(Segment(" " * (self.size.width - x), bg_style, None))
         return Strip(segments)
 
