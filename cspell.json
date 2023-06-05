@@ -1,0 +1,21 @@
+{
+	"files": [
+		"**",
+		".*/**"
+	],
+	"enableFiletypes": [
+		"pip-requirements",
+		"shellscript",
+		"toml"
+	],
+	"ignorePaths": [
+		".git",
+		"*.(bmp|png|jpg|jpeg|gif|svg|ico|tiff|tif|ans|flf)",
+		"*.log",
+		"**/typings/**/*",
+		"__pycache__",
+		"*.egg-info/**/*"
+	],
+	"words": [
+	]
+}
