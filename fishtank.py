@@ -46,7 +46,14 @@ class Fish(Entity):
 
 class SeaUrchin(Entity):
     def __init__(self, x, y):
-        super().__init__(x, y, random.choice(['✶', '✷', '✸', '✹', '✺', '*', '🦔']))
+        symbol = random.choice(['✶', '✷', '✸', '✹', '✺', '*', '🦔'])
+        color = random.choice([
+            Color.parse("rgb(255, 132, 0)"),
+            Color.parse("rgb(136, 61, 194)"),
+            Color.parse("rgb(255, 0, 0)"),
+            Color.parse("rgb(255, 255, 255)"),
+        ])
+        super().__init__(x, y, symbol, color)
 
     def move(self):
         self.y += 1
@@ -138,7 +145,8 @@ class Tank(Widget):
 
             new_x = entity.x
             segments.append(Segment(" " * (new_x - x), bg_style, None))
-            entity_segment = Segment(entity.symbol, bg_style, None)
+            entity_style = bg_style + Style(color=entity.color.rich_color)
+            entity_segment = Segment(entity.symbol, entity_style, None)
             segments.append(entity_segment)
             x = new_x + entity_segment.cell_length
 
