@@ -58,9 +58,9 @@ class SeaUrchin(Entity):
     def move(self):
         self.y += 1
 
-        # Wrap around the screen
+        # Settle on the bottom of the tank
         if self.y > 23:
-            self.y = 0
+            self.y = 23
 
 class Seaweed(Entity):
     def __init__(self, x, y, seaweed_below=None):
