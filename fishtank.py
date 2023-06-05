@@ -15,6 +15,12 @@ class Entity:
     def draw(self):
         print(f"\033[{self.y+1};{self.x+1}H{self.symbol}")
 
+def set_background_color(row, color):
+    print(f"\033[{row+1};1H\033[48;2;{color[0]};{color[1]};{color[2]}m\033[K", end='')
+
+def reset_color():
+    print("\033[0m")
+
 class Fish(Entity):
     def __init__(self, x, y):
         super().__init__(x, y, '🐠')
@@ -76,15 +82,30 @@ sea_urchins = [SeaUrchin(random.randint(0, 79), random.randint(0, 23)) for _ in 
 seaweed = [Seaweed(random.randint(0, 79), random.randint(0, 23)) for _ in range(10)]
 bubbles = []
 
+# Define gradient colors
+light_blue = (135, 206, 250)
+dark_blue = (25, 25, 112)
+
 # Clear the screen
 print("\033[2J")
 
 # Main loop
 while True:
+    # Set the background color for each row with a gradient
+    for row in range(24):
+        color = [
+            int(light_blue[c] + (dark_blue[c] - light_blue[c]) * (row / 24))
+            for c in range(3)
+        ]
+        set_background_color(row, color)
+
     # Move and draw entities
     for entity in fish + sea_urchins + seaweed + bubbles:
         entity.move()
         entity.draw()
+
+    # Reset the color to default
+    reset_color()
 
     # Sleep for a short while to control the speed
     time.sleep(0.1)
