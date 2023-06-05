@@ -26,7 +26,7 @@ class Entity:
 
 class Fish(Entity):
     def __init__(self, x, y):
-        super().__init__(x, y, '🐠')
+        super().__init__(x, y, random.choice(['🐡', '🐠', '🐠', '🐟', '🐟', '🐟']))
         self.direction = random.choice([-1, 1])
         self.bubble_timer = 0
 
@@ -52,7 +52,7 @@ class Fish(Entity):
 
 class SeaUrchin(Entity):
     def __init__(self, x, y):
-        super().__init__(x, y, '🦔')
+        super().__init__(x, y, random.choice(['✶', '✷', '✸', '✹', '✺', '*', '🦔']))
 
     def move(self):
         self.y += 1
@@ -70,7 +70,7 @@ class Seaweed(Entity):
 
 class Bubble(Entity):
     def __init__(self, x, y):
-        super().__init__(x, y, '💦')
+        super().__init__(x, y, '🫧')
 
     def move(self):
         self.y -= 1
