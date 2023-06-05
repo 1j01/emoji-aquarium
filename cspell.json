@@ -17,6 +17,8 @@
 		"*.egg-info/**/*"
 	],
 	"words": [
-		"asciiquarium"
+		"asciiquarium",
+		"fishtank",
+		"pycache"
 	]
 }
