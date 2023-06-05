@@ -1,6 +1,8 @@
 
 # Terminal Fishtank
 
+Install with `pip install -r requirements.txt`
+
 Run with `python fishtank.py`
 
 
