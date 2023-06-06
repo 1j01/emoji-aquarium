@@ -106,6 +106,11 @@ class Entity:
     def move(self):
         pass
 
+    def collision_at(self, offset: Offset) -> bool:
+        entities = [e for e in solid_entities() if e is not self]
+        return offset.y >= tank_height or entity_at(offset, entities) is not None
+
+
 class Fish(Entity):
     def __init__(self, x, y):
         super().__init__(x, y, random.choice(['🐡', '🐠', '🐠', '🐟', '🐟', '🐟']))
@@ -145,7 +150,7 @@ class Ground(Entity):
         super().__init__(x, y, symbol, color, Color.parse("rgb(43, 25, 22)"))
 
     def move(self):
-        if not collision_at(Offset(self.x, self.y + 1)):
+        if not self.collision_at(Offset(self.x, self.y + 1)):
             self.y += 1
         # In case tank shrinks, ground will be regenerated.
 
@@ -161,7 +166,7 @@ class SeaUrchin(Entity):
         super().__init__(x, y, symbol, color)
 
     def move(self):
-        if not collision_at(Offset(self.x, self.y + 1)):
+        if not self.collision_at(Offset(self.x, self.y + 1)):
             self.y += 1
         # In case tank shrinks, move up if we're out of bounds
         if self.y > tank_height - 1:
@@ -176,13 +181,13 @@ class Seaweed(Entity):
     def move(self):
         # Apply gravity to bottom-most seaweed
         if self.seaweed_below is None:
-            if not collision_at(Offset(self.x, self.y + 1)):
+            if not self.collision_at(Offset(self.x, self.y + 1)):
                 self.y += 1
             # In case tank shrinks, move up if we're out of bounds
             if self.y > tank_height - 1:
                 self.y = tank_height - 1
             # If we're inside the ground, move up
-            if collision_at(Offset(self.x, self.y)):
+            if self.collision_at(Offset(self.x, self.y)):
                 self.y -= 1
         
         # Wiggle back and forth, within 1 space of the seaweed below and above
@@ -253,9 +258,6 @@ def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
         if entity.x <= offset.x < entity.x + entity.symbol_width and entity.y == offset.y:
             return entity
     return None
-
-def collision_at(offset: Offset) -> bool:
-    return offset.y >= tank_height or entity_at(offset, solid_entities()) is not None
 
 def step():
     # Move entities
