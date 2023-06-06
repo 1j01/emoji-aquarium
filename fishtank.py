@@ -134,7 +134,11 @@ class BottomDweller(Sinker):
         # If we're on the ground, move left or right
         if self.collision_at(Offset(self.x, self.y + 1)) and random.random() < 0.3:
             if self.collision_at(Offset(self.x + self.direction, self.y)):
-                self.direction *= -1
+                if not self.collision_at(Offset(self.x + self.direction, self.y - 1)):
+                    self.x += self.direction
+                    self.y -= 1
+                else:
+                    self.direction *= -1
             else:
                 self.x += self.direction
             # Randomly change direction occasionally
