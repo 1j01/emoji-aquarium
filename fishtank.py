@@ -110,6 +110,16 @@ class Entity:
         entities = [e for e in solid_entities() if e is not self]
         return offset.y >= tank_height or entity_at(offset, entities) is not None
 
+class Sinker(Entity):
+    def move(self):
+        if not self.collision_at(Offset(self.x, self.y + 1)):
+            self.y += 1
+        # In case tank shrinks, move up if we're out of bounds
+        if self.y > tank_height - 1:
+            self.y = tank_height - 1
+        # If we're inside the ground, move up
+        if self.collision_at(Offset(self.x, self.y)):
+            self.y -= 1
 
 class Fish(Entity):
     def __init__(self, x, y):
@@ -157,7 +167,7 @@ class Ground(Entity):
             self.y += 1
         # In case tank shrinks, ground will be regenerated.
 
-class SeaUrchin(Entity):
+class SeaUrchin(Sinker):
     def __init__(self, x, y):
         symbol = random.choice(['✶', '✷', '✸', '✹', '✺', '*', '⚹', '✳', '꘎', '💥']) # '🗯', '🦔'
         color = random.choice([
@@ -168,14 +178,7 @@ class SeaUrchin(Entity):
         ])
         super().__init__(x, y, symbol, color)
 
-    def move(self):
-        if not self.collision_at(Offset(self.x, self.y + 1)):
-            self.y += 1
-        # In case tank shrinks, move up if we're out of bounds
-        if self.y > tank_height - 1:
-            self.y = tank_height - 1
-
-class Seaweed(Entity):
+class Seaweed(Sinker):
     def __init__(self, x, y, seaweed_below=None):
         super().__init__(x, y, '🌿')
         self.seaweed_below = seaweed_below
@@ -184,14 +187,7 @@ class Seaweed(Entity):
     def move(self):
         # Apply gravity to bottom-most seaweed
         if self.seaweed_below is None:
-            if not self.collision_at(Offset(self.x, self.y + 1)):
-                self.y += 1
-            # In case tank shrinks, move up if we're out of bounds
-            if self.y > tank_height - 1:
-                self.y = tank_height - 1
-            # If we're inside the ground, move up
-            if self.collision_at(Offset(self.x, self.y)):
-                self.y -= 1
+            super().move()
         
         # Wiggle back and forth, within 1 space of the seaweed below and above
         if self.seaweed_below is not None:
