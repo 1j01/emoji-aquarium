@@ -145,12 +145,9 @@ class Ground(Entity):
         super().__init__(x, y, symbol, color, Color.parse("rgb(43, 25, 22)"))
 
     def move(self):
-        return
-        self.y += 1
-
-        # Settle on the bottom of the tank
-        if self.y > tank_height - 1:
-            self.y = tank_height - 1
+        if not collision_at(Offset(self.x, self.y + 1)):
+            self.y += 1
+        # In case tank shrinks, ground will be regenerated.
 
 class SeaUrchin(Entity):
     def __init__(self, x, y):
@@ -164,9 +161,9 @@ class SeaUrchin(Entity):
         super().__init__(x, y, symbol, color)
 
     def move(self):
-        self.y += 1
-
-        # Settle on the bottom of the tank
+        if not collision_at(Offset(self.x, self.y + 1)):
+            self.y += 1
+        # In case tank shrinks, move up if we're out of bounds
         if self.y > tank_height - 1:
             self.y = tank_height - 1
 
@@ -237,11 +234,17 @@ dark_blue = Color(25, 25, 112)
 def all_entities():
     return fish + sea_urchins + seaweed + bubbles + ground
 
-def entity_at(offset: Offset) -> Entity | None:
-    for entity in all_entities():
+def solid_entities():
+    return ground + sea_urchins
+
+def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
+    for entity in entities:
         if entity.x <= offset.x < entity.x + entity.symbol_width and entity.y == offset.y:
             return entity
     return None
+
+def collision_at(offset: Offset) -> bool:
+    return offset.y >= tank_height or entity_at(offset, solid_entities()) is not None
 
 def step():
     # Move entities
@@ -291,7 +294,7 @@ class Tank(Widget):
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
         self.capture_mouse()
-        self.dragging = entity_at(event.offset)
+        self.dragging = entity_at(event.offset, all_entities())
         if self.dragging is not None:
             self.drag_offset = event.offset - Offset(self.dragging.x, self.dragging.y)
         else:
