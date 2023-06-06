@@ -259,8 +259,10 @@ def collision_at(offset: Offset) -> bool:
 
 def step():
     # Move entities
+    dragging = app.query_one(Tank).dragging
     for entity in all_entities():
-        entity.move()
+        if entity is not dragging:
+            entity.move()
 
 class Tank(Widget):
 
@@ -313,6 +315,8 @@ class Tank(Widget):
 
     def on_mouse_up(self, event: events.MouseUp) -> None:
         self.release_mouse()
+        self.dragging = None
+        self.drag_offset = None
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
         if event.button != 1:
