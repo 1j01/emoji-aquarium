@@ -198,6 +198,27 @@ class SeaUrchin(Sinker):
         ])
         super().__init__(x, y, symbol, color)
 
+class Coral(Sinker):
+    def __init__(self, x, y):
+        symbol = random.choice('🪸🧠🫚') # 🫁
+        color = random.choice([
+            Color.parse("rgb(255, 179, 0)"),
+            Color.parse("rgb(255, 213, 0)"),
+            Color.parse("rgb(255, 210, 254)"),
+            Color.parse("rgb(255, 255, 255)"),
+        ])
+        super().__init__(x, y, symbol, color)
+
+class Shell(Sinker):
+    def __init__(self, x, y):
+        symbol = random.choice('🦪🐚𖡎') # 🥟
+        super().__init__(x, y, symbol)
+
+class Rock(Sinker):
+    def __init__(self, x, y):
+        symbol = random.choice('🪨🪨🪨🪨🗿')
+        super().__init__(x, y, symbol)
+
 class Seaweed(Sinker):
     def __init__(self, x, y, seaweed_below=None):
         super().__init__(x, y, '🌿')
@@ -258,6 +279,9 @@ class Bubble(Entity):
 fish = [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 sea_urchins = [SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 bottom_dwellers = [BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+coral = [Coral(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
+shells = [Shell(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
+rocks = [Rock(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
 seaweed = [Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
 bubbles = []
 ground = []
@@ -278,10 +302,10 @@ light_blue = Color(135, 206, 250)
 dark_blue = Color(25, 25, 112)
 
 def all_entities():
-    return fish + sea_urchins + bottom_dwellers + seaweed + bubbles + ground
+    return fish + sea_urchins + bottom_dwellers + seaweed + bubbles + ground + coral + shells + rocks
 
 def solid_entities():
-    return ground + sea_urchins
+    return ground + sea_urchins + coral + shells + rocks
 
 def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
     for entity in entities:
