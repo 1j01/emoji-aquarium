@@ -411,8 +411,15 @@ class Tank(Widget):
 class FishTankApp(App):
     def on_resize(self, event: events.Resize) -> None:
         global tank_width, tank_height
+        
+        # Move everything up/down to keep things anchored relative to the bottom of the tank.
+        # Do this before re-generating the ground, so that the ground doesn't get offset.
+        for entity in all_entities():
+            entity.y += event.size.height - tank_height
+        
         tank_width = event.size.width
         tank_height = event.size.height
+        
         generate_ground()
 
     def compose(self) -> ComposeResult:
