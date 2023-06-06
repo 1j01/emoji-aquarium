@@ -241,6 +241,17 @@ class Tank(Widget):
         segments.append(Segment(" " * (self.size.width - x), bg_style, None))
         return Strip(segments)
 
+    def on_mouse_down(self, event: events.MouseDown) -> None:
+        bubbles.append(Bubble(event.offset.x, event.offset.y))
+        self.capture_mouse()
+
+    def on_mouse_up(self, event: events.MouseUp) -> None:
+        self.release_mouse()
+
+    def on_mouse_move(self, event: events.MouseMove) -> None:
+        if random.random() < 0.5 and event.button == 1:
+            bubbles.append(Bubble(event.offset.x, event.offset.y))
+
 class FishTankApp(App):
     def update(self):
         step()
