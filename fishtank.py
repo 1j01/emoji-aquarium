@@ -227,8 +227,10 @@ class Shell(Sinker):
 
 class Rock(Sinker):
     def __init__(self, x, y):
-        symbol = random.choice('🪨🪨🪨🪨🗿')
-        super().__init__(x, y, symbol)
+        # rock emoji width is unreliable (it takes up one space in VS Code, but two in Ubuntu Terminal)
+        # symbol = random.choice('🪨🪨🪨🪨🗿')
+        symbol = random.choice('⬬⬟⭓⬢⬣☗☁⬤🗿')
+        super().__init__(x, y, symbol, Color.parse("rgb(128, 128, 128)"))
 
 class Seaweed(Sinker):
     def __init__(self, x, y, seaweed_below=None):
