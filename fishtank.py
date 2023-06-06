@@ -345,6 +345,13 @@ class Tank(Widget):
     dragging: var[Entity | None] = var(None)
     drag_offset: var[Offset | None] = var(None)
 
+    def update(self):
+        step()
+        self.refresh()
+
+    def on_mount(self):
+        self.set_interval(0.1, self.update)
+
     def render_line(self, y: int) -> Strip:
         """Render a line of the widget."""
         bg_color = light_blue.blend(dark_blue, y / self.size.height)
@@ -404,13 +411,6 @@ class Tank(Widget):
             bubbles.append(Bubble(event.offset.x, event.offset.y))
 
 class FishTankApp(App):
-    def update(self):
-        step()
-        self.query_one(Tank).refresh()
-
-    def on_mount(self):
-        self.set_interval(0.1, self.update)
-
     def on_resize(self, event: events.Resize) -> None:
         global tank_width, tank_height
         tank_width = event.size.width
