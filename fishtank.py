@@ -281,7 +281,8 @@ class Seaweed(Sinker):
 
 class Bubble(Entity):
     def __init__(self, x, y):
-        symbol = random.choice(['･', '◦', '∘', 'ߋ', '𝚘', 'ᴑ', 'o', 'O', 'ₒ', '°', '˚', 'ᴼ', ':', 'ஃ', '🝆', 'ꖜ', 'ꕣ', 'ꕢ', *['🫧'] * 10])
+        # 🫧 width is unreliable (looks wrong in Ubuntu terminal)
+        symbol = random.choice(['･', '◦', '∘', 'ߋ', '𝚘', 'ᴑ', 'o', 'O', 'ₒ', '°', '˚', 'ᴼ', ':', 'ஃ', '🝆', 'ꖜ', 'ꕣ', 'ꕢ']) # , *['🫧'] * 10
         super().__init__(x, y, symbol, Color.parse("rgb(157, 229, 255)"))
 
     def move(self):
