@@ -14,6 +14,8 @@ from textual.app import App, ComposeResult
 from textual.color import Color
 from textual.strip import Strip
 from textual.widget import Widget
+from textual.geometry import Offset
+from textual.reactive import var
 
 def restart_program():
     """Restarts the current program, after resetting terminal state, and cleaning up file objects and descriptors."""
@@ -96,6 +98,7 @@ class Entity:
         self.x = x
         self.y = y
         self.symbol = symbol
+        self.symbol_width = 0 # calculated when rendering
         self.color = color
 
     def move(self):
@@ -200,12 +203,22 @@ dark_blue = Color(25, 25, 112)
 def all_entities():
     return fish + sea_urchins + seaweed + bubbles
 
+def entity_at(offset: Offset) -> Entity | None:
+    for entity in all_entities():
+        if entity.x <= offset.x < entity.x + entity.symbol_width and entity.y == offset.y:
+            return entity
+    return None
+
 def step():
     # Move entities
     for entity in all_entities():
         entity.move()
 
 class Tank(Widget):
+
+    dragging: var[Entity | None] = var(None)
+    drag_offset: var[Offset | None] = var(None)
+
     def render_line(self, y: int) -> Strip:
         """Render a line of the widget."""
         bg_color = light_blue.blend(dark_blue, y / self.size.height)
@@ -236,20 +249,30 @@ class Tank(Widget):
             entity_style = bg_style + Style(color=entity.color.rich_color)
             entity_segment = Segment(entity.symbol, entity_style, None)
             segments.append(entity_segment)
+            entity.symbol_width = entity_segment.cell_length
             x = new_x + entity_segment.cell_length
 
         segments.append(Segment(" " * (self.size.width - x), bg_style, None))
         return Strip(segments)
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
-        bubbles.append(Bubble(event.offset.x, event.offset.y))
         self.capture_mouse()
+        self.dragging = entity_at(event.offset)
+        if self.dragging is not None:
+            self.drag_offset = event.offset - Offset(self.dragging.x, self.dragging.y)
+        else:
+            bubbles.append(Bubble(event.offset.x, event.offset.y))
 
     def on_mouse_up(self, event: events.MouseUp) -> None:
         self.release_mouse()
 
     def on_mouse_move(self, event: events.MouseMove) -> None:
-        if random.random() < 0.5 and event.button == 1:
+        if event.button != 1:
+            return
+        if self.dragging is not None:
+            self.dragging.x = event.offset.x - self.drag_offset.x
+            self.dragging.y = event.offset.y - self.drag_offset.y
+        elif random.random() < 0.5:
             bubbles.append(Bubble(event.offset.x, event.offset.y))
 
 class FishTankApp(App):
