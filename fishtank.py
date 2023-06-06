@@ -174,6 +174,17 @@ class Seaweed(Entity):
         self.seaweed_above = None
 
     def move(self):
+        # Apply gravity to bottom-most seaweed
+        if self.seaweed_below is None:
+            if not collision_at(Offset(self.x, self.y + 1)):
+                self.y += 1
+            # In case tank shrinks, move up if we're out of bounds
+            if self.y > tank_height - 1:
+                self.y = tank_height - 1
+            # If we're inside the ground, move up
+            if collision_at(Offset(self.x, self.y)):
+                self.y -= 1
+        
         # Wiggle back and forth, within 1 space of the seaweed below and above
         if self.seaweed_below is not None:
             new_x = self.x + random.randint(-1, 1)
