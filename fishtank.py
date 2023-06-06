@@ -211,7 +211,7 @@ class SeaUrchin(Sinker):
 
 class Coral(Sinker):
     def __init__(self, x, y):
-        symbol = random.choice('🪸🧠🫚') # 🫁
+        symbol = random.choice('🪸🧠') # 🫚🫁
         color = random.choice([
             Color.parse("rgb(255, 179, 0)"),
             Color.parse("rgb(255, 213, 0)"),
