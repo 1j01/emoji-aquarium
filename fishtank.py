@@ -191,7 +191,14 @@ class Ground(Entity):
             Color.parse("rgb(205, 133, 63)"),
             Color.parse("rgb(222, 184, 135)"),
         ])
-        super().__init__(x, y, symbol, color, Color.parse("rgb(43, 25, 22)"))
+        bgcolor = random.choice([
+            Color.parse("rgb(102, 67, 29)"),
+            Color.parse("rgb(129, 60, 10)"),
+            Color.parse("rgb(139, 69, 19)"),
+            Color.parse("rgb(160, 82, 45)"),
+            Color.parse("rgb(175, 107, 40)"),
+        ])
+        super().__init__(x, y, symbol, color, bgcolor)
 
     def move(self):
         if not self.collision_at(Offset(self.x, self.y + 1)):
