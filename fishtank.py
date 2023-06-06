@@ -193,14 +193,24 @@ class Seaweed(Entity):
         # Wiggle back and forth, within 1 space of the seaweed below and above
         if self.seaweed_below is not None:
             new_x = self.x + random.randint(-1, 1)
-            # constrain to the range of the seaweed below
-            new_x = max(new_x, self.seaweed_below.x - 1)
-            new_x = min(new_x, self.seaweed_below.x + 1)
             # constrain to the range of the seaweed above
             if self.seaweed_above is not None:
                 new_x = max(new_x, self.seaweed_above.x - 1)
                 new_x = min(new_x, self.seaweed_above.x + 1)
+            # constrain to the range of the seaweed below
+            # Do this after so it takes precedence, since the bottom seaweed has gravity.
+            new_x = max(new_x, self.seaweed_below.x - 1)
+            new_x = min(new_x, self.seaweed_below.x + 1)
+            # Constrain x so it doesn't move too much at once
+            new_x = max(new_x, self.x - 1)
+            new_x = min(new_x, self.x + 1)
+            # Move horizontally
             self.x = new_x
+            # Constrain y
+            new_y = self.seaweed_below.y - 1
+            new_y = min(new_y, self.y + 1)
+            new_y = max(new_y, self.y - 1)
+            self.y = new_y
 
         # Create new seaweed above if there is room
         growth_rate = 0.01
