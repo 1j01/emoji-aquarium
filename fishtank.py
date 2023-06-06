@@ -21,8 +21,10 @@ tank_height = 24
 # Class hierarchy for entities
 class Entity:
 
-    all_entities: list['Entity'] = []
-    solid_entities: list['Entity'] = []
+    instances: list['Entity'] = []
+    """All instances of this class. This is available on each subclass."""
+    solid_instances: list['Entity'] = []
+    """All instances of this class that are solid. This is available on each subclass."""
 
     def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None, solid=False):
         self.x = x
@@ -35,32 +37,32 @@ class Entity:
         self.add_to_lists()
 
     def add_to_lists(self):
-        Entity.all_entities.append(self)
-        if self.solid:
-            Entity.solid_entities.append(self)
         for cls in self.__class__.mro():
+            cls.instances.append(self)
+            if self.solid:
+                cls.solid_instances.append(self)
             if cls is Entity:
                 break
-            cls.instances.append(self)
 
     def remove_from_lists(self):
-        Entity.all_entities.remove(self)
-        if self in Entity.solid_entities:
-            Entity.solid_entities.remove(self)
         for cls in self.__class__.mro():
+            if self in cls.instances:
+                cls.instances.remove(self)
+            if self in cls.solid_instances:
+                cls.solid_instances.remove(self)
             if cls is Entity:
                 break
-            cls.instances.remove(self)
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         cls.instances = []
+        cls.solid_instances = []
 
     def move(self):
         pass
 
     def collision_at(self, offset: Offset) -> bool:
-        entities = [e for e in Entity.solid_entities if e is not self]
+        entities = [e for e in Entity.solid_instances if e is not self]
         if offset.y >= tank_height:
             return True
         if entity_at(offset, entities) is not None:
@@ -286,7 +288,7 @@ class Tank(Widget):
     def update(self):
         # Move entities
         dragging = app.query_one(Tank).dragging
-        for entity in Entity.all_entities:
+        for entity in Entity.instances:
             if entity is not dragging:
                 entity.move()
         # Update the screen
@@ -299,7 +301,7 @@ class Tank(Widget):
         """Render a line of the widget."""
         bg_color = light_blue.blend(dark_blue, y / self.size.height)
         bg_style = Style(bgcolor=bg_color.rich_color)
-        entities_at_y = [entity for entity in Entity.all_entities if entity.y == y]
+        entities_at_y = [entity for entity in Entity.instances if entity.y == y]
         entities_at_y.sort(key=lambda entity: entity.x)
         segments = []
         x = 0
@@ -333,7 +335,7 @@ class Tank(Widget):
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
         self.capture_mouse()
-        self.dragging = entity_at(event.offset, Entity.all_entities)
+        self.dragging = entity_at(event.offset, Entity.instances)
         if self.dragging is not None:
             self.drag_offset = event.offset - Offset(self.dragging.x, self.dragging.y)
         else:
@@ -359,7 +361,7 @@ class FishTankApp(App):
         
         # Move everything up/down to keep things anchored relative to the bottom of the tank.
         # Do this before re-generating the ground, so that the ground doesn't get offset.
-        for entity in Entity.all_entities:
+        for entity in Entity.instances:
             entity.y += event.size.height - tank_height
         
         tank_width = event.size.width
