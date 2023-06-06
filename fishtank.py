@@ -108,7 +108,14 @@ class Entity:
 
     def collision_at(self, offset: Offset) -> bool:
         entities = [e for e in solid_entities() if e is not self]
-        return offset.y >= tank_height or entity_at(offset, entities) is not None
+        if offset.y >= tank_height:
+            return True
+        if entity_at(offset, entities) is not None:
+            return True
+        if self.symbol_width > 1 and entity_at(offset + Offset(1, 0), entities) is not None:
+            return True
+        # Assuming there's no character wider than 2 cells
+        return False
 
 class Sinker(Entity):
     def move(self):
