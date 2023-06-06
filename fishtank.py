@@ -300,7 +300,7 @@ bubbles = []
 ground = []
 
 def ground_height(x: int) -> int:
-    return int(math.sin(x / 10) * 2 + 3)
+    return 4 + int(2 * math.sin(x / 10) + 1 * math.sin(x / 5) + 1 * math.sin(x / 2))
 
 def generate_ground():
     ground.clear()
