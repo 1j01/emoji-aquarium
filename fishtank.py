@@ -20,19 +20,26 @@ tank_height = 24
 
 # Class hierarchy for entities
 class Entity:
-    def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None):
+
+    all_entities: list['Entity'] = []
+    solid_entities: list['Entity'] = []
+
+    def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None, solid=False):
         self.x = x
         self.y = y
         self.symbol = symbol
         self.symbol_width = 0 # calculated when rendering
         self.color = color
         self.bgcolor = bgcolor
+        Entity.all_entities.append(self)
+        if solid:
+            Entity.solid_entities.append(self)
 
     def move(self):
         pass
 
     def collision_at(self, offset: Offset) -> bool:
-        entities = [e for e in solid_entities() if e is not self]
+        entities = [e for e in Entity.solid_entities if e is not self]
         if offset.y >= tank_height:
             return True
         if entity_at(offset, entities) is not None:
@@ -123,7 +130,7 @@ class Ground(Entity):
             Color.parse("rgb(151, 70, 33)"),
             Color.parse("rgb(175, 107, 40)"),
         ])
-        super().__init__(x, y, symbol, color, bgcolor)
+        super().__init__(x, y, symbol, color, bgcolor, solid=True)
 
     def move(self):
         if not self.collision_at(Offset(self.x, self.y + 1)):
@@ -139,7 +146,7 @@ class SeaUrchin(Sinker):
             Color.parse("rgb(255, 0, 0)"),
             Color.parse("rgb(255, 255, 255)"),
         ])
-        super().__init__(x, y, symbol, color)
+        super().__init__(x, y, symbol, color, solid=True)
 
 class Coral(Sinker):
     def __init__(self, x, y):
@@ -150,19 +157,19 @@ class Coral(Sinker):
             Color.parse("rgb(255, 210, 254)"),
             Color.parse("rgb(255, 255, 255)"),
         ])
-        super().__init__(x, y, symbol, color)
+        super().__init__(x, y, symbol, color, solid=True)
 
 class Shell(Sinker):
     def __init__(self, x, y):
         symbol = random.choice('🦪🐚𖡎') # 🥟
-        super().__init__(x, y, symbol)
+        super().__init__(x, y, symbol, solid=True)
 
 class Rock(Sinker):
     def __init__(self, x, y):
         # rock emoji width is unreliable (it takes up one space in VS Code, but two in Ubuntu Terminal)
         # symbol = random.choice('🪨🪨🪨🪨🗿')
         symbol = random.choice('⬬⬟⭓⬢⬣☗☁⬤🗿')
-        super().__init__(x, y, symbol, Color.parse("rgb(128, 128, 128)"))
+        super().__init__(x, y, symbol, Color.parse("rgb(128, 128, 128)"), solid=True)
 
 class Seaweed(Sinker):
     def __init__(self, x, y, seaweed_below=None):
@@ -220,6 +227,7 @@ class Bubble(Entity):
         # Remove the bubble if it reaches the top of the tank
         if self.y < 0:
             bubbles.remove(self)
+            Entity.all_entities.remove(self)
 
 # Initialize the entities
 fish = [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
@@ -247,12 +255,6 @@ generate_ground()
 light_blue = Color(135, 206, 250)
 dark_blue = Color(25, 25, 112)
 
-def all_entities():
-    return fish + sea_urchins + bottom_dwellers + seaweed + bubbles + ground + coral + shells + rocks
-
-def solid_entities():
-    return ground + sea_urchins + coral + shells + rocks
-
 def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
     for entity in entities:
         if entity.x <= offset.x < entity.x + entity.symbol_width and entity.y == offset.y:
@@ -261,13 +263,13 @@ def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
 
 class Tank(Widget):
 
-    dragging: var[Entity | None] = var(None)
-    drag_offset: var[Offset | None] = var(None)
+    dragging: var[Entity | None] = var[Entity | None](None)
+    drag_offset: var[Offset | None] = var[Offset | None](None)
 
     def update(self):
         # Move entities
         dragging = app.query_one(Tank).dragging
-        for entity in all_entities():
+        for entity in Entity.all_entities:
             if entity is not dragging:
                 entity.move()
         # Update the screen
@@ -280,7 +282,7 @@ class Tank(Widget):
         """Render a line of the widget."""
         bg_color = light_blue.blend(dark_blue, y / self.size.height)
         bg_style = Style(bgcolor=bg_color.rich_color)
-        entities_at_y = [entity for entity in all_entities() if entity.y == y]
+        entities_at_y = [entity for entity in Entity.all_entities if entity.y == y]
         entities_at_y.sort(key=lambda entity: entity.x)
         segments = []
         x = 0
@@ -314,7 +316,7 @@ class Tank(Widget):
 
     def on_mouse_down(self, event: events.MouseDown) -> None:
         self.capture_mouse()
-        self.dragging = entity_at(event.offset, all_entities())
+        self.dragging = entity_at(event.offset, Entity.all_entities)
         if self.dragging is not None:
             self.drag_offset = event.offset - Offset(self.dragging.x, self.dragging.y)
         else:
@@ -340,7 +342,7 @@ class FishTankApp(App):
         
         # Move everything up/down to keep things anchored relative to the bottom of the tank.
         # Do this before re-generating the ground, so that the ground doesn't get offset.
-        for entity in all_entities():
+        for entity in Entity.all_entities:
             entity.y += event.size.height - tank_height
         
         tank_width = event.size.width
