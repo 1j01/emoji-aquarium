@@ -333,20 +333,18 @@ def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
             return entity
     return None
 
-def step():
-    # Move entities
-    dragging = app.query_one(Tank).dragging
-    for entity in all_entities():
-        if entity is not dragging:
-            entity.move()
-
 class Tank(Widget):
 
     dragging: var[Entity | None] = var(None)
     drag_offset: var[Offset | None] = var(None)
 
     def update(self):
-        step()
+        # Move entities
+        dragging = app.query_one(Tank).dragging
+        for entity in all_entities():
+            if entity is not dragging:
+                entity.move()
+        # Update the screen
         self.refresh()
 
     def on_mount(self):
