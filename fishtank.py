@@ -2,10 +2,14 @@
 import random
 from rich.segment import Segment
 from rich.style import Style
+from textual import events
 from textual.app import App, ComposeResult
 from textual.color import Color
 from textual.strip import Strip
 from textual.widget import Widget
+
+tank_width = 80
+tank_height = 24
 
 # Class hierarchy for entities
 class Entity:
@@ -40,8 +44,8 @@ class Fish(Entity):
 
         # Wrap around the screen
         if self.x < 0:
-            self.x = 79
-        elif self.x > 79:
+            self.x = tank_width
+        elif self.x > tank_width:
             self.x = 0
 
 class SeaUrchin(Entity):
@@ -59,8 +63,8 @@ class SeaUrchin(Entity):
         self.y += 1
 
         # Settle on the bottom of the tank
-        if self.y > 23:
-            self.y = 23
+        if self.y > tank_height - 1:
+            self.y = tank_height - 1
 
 class Seaweed(Entity):
     def __init__(self, x, y, seaweed_below=None):
@@ -105,9 +109,9 @@ class Bubble(Entity):
             bubbles.remove(self)
 
 # Initialize the entities
-fish = [Fish(random.randint(0, 79), random.randint(0, 23)) for _ in range(5)]
-sea_urchins = [SeaUrchin(random.randint(0, 79), random.randint(0, 23)) for _ in range(5)]
-seaweed = [Seaweed(random.randint(0, 79), random.randint(0, 23)) for _ in range(10)]
+fish = [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+sea_urchins = [SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+seaweed = [Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
 bubbles = []
 
 # Define gradient colors
@@ -165,6 +169,11 @@ class FishTankApp(App):
 
     def on_mount(self):
         self.set_interval(0.1, self.update)
+
+    def on_resize(self, event: events.Resize) -> None:
+        global tank_width, tank_height
+        tank_width = event.size.width
+        tank_height = event.size.height
 
     def compose(self) -> ComposeResult:
         yield Tank()
