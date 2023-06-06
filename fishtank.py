@@ -46,7 +46,7 @@ class Fish(Entity):
 
 class SeaUrchin(Entity):
     def __init__(self, x, y):
-        symbol = random.choice(['✶', '✷', '✸', '✹', '✺', '*', '🦔'])
+        symbol = random.choice(['✶', '✷', '✸', '✹', '✺', '*', '⚹', '✳', '꘎', '💥']) # '🗯', '🦔'
         color = random.choice([
             Color.parse("rgb(255, 132, 0)"),
             Color.parse("rgb(136, 61, 194)"),
