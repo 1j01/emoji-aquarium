@@ -121,6 +121,26 @@ class Sinker(Entity):
         if self.collision_at(Offset(self.x, self.y)):
             self.y -= 1
 
+class BottomDweller(Sinker):
+    # def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None):
+    #     super().__init__(x, y, symbol, color, bgcolor)
+    def __init__(self, x, y):
+        symbol = random.choice('🦞🐌🦐🦀🦑🐙')
+        super().__init__(x, y, symbol)
+        self.direction = random.choice([-1, 1])
+
+    def move(self):
+        super().move()
+        # If we're on the ground, move left or right
+        if self.collision_at(Offset(self.x, self.y + 1)) and random.random() < 0.3:
+            if self.collision_at(Offset(self.x + self.direction, self.y)):
+                self.direction *= -1
+            else:
+                self.x += self.direction
+            # Randomly change direction occasionally
+            if random.random() < 0.05:
+                self.direction *= -1
+
 class Fish(Entity):
     def __init__(self, x, y):
         super().__init__(x, y, random.choice(['🐡', '🐠', '🐠', '🐟', '🐟', '🐟']))
@@ -237,6 +257,7 @@ class Bubble(Entity):
 # Initialize the entities
 fish = [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 sea_urchins = [SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+bottom_dwellers = [BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 seaweed = [Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
 bubbles = []
 ground = []
@@ -257,7 +278,7 @@ light_blue = Color(135, 206, 250)
 dark_blue = Color(25, 25, 112)
 
 def all_entities():
-    return fish + sea_urchins + seaweed + bubbles + ground
+    return fish + sea_urchins + bottom_dwellers + seaweed + bubbles + ground
 
 def solid_entities():
     return ground + sea_urchins
