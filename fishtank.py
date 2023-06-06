@@ -118,7 +118,10 @@ class Fish(Entity):
         self.bubble_timer = 0
 
     def move(self):
-        self.x += self.direction
+        if self.collision_at(Offset(self.x + self.direction, self.y)):
+            self.direction *= -1
+        else:
+            self.x += self.direction
 
         # Randomly change direction occasionally
         if random.random() < 0.05:
