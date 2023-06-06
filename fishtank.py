@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import math
 import os
 import sys
 import psutil
@@ -94,12 +95,13 @@ tank_height = 24
 
 # Class hierarchy for entities
 class Entity:
-    def __init__(self, x, y, symbol, color=Color(255, 255, 255)):
+    def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None):
         self.x = x
         self.y = y
         self.symbol = symbol
         self.symbol_width = 0 # calculated when rendering
         self.color = color
+        self.bgcolor = bgcolor
 
     def move(self):
         pass
@@ -129,6 +131,26 @@ class Fish(Entity):
             self.x = tank_width
         elif self.x > tank_width:
             self.x = 0
+
+class Ground(Entity):
+    def __init__(self, x, y):
+        symbol = random.choice('       ⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎⡏⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⢀⢁⢂⢃⢄⢅⢆⢇⢈⢉⢊⢋⢌⢍⢎⢏⢐⢑⢒⢓⢔⢕⢖⢗⢘⢙⢚⢛⢜⢝⢞⢟⢠⢡⢢⢣⢤⢥⢦⢧⢨⢩⢪⢫⢬⢭⢮⢯⢰⢱⢲⢳⢴⢵⢶⢷⢸⢹⢺⢻⢼⢽⢾⢿⣀⣁⣂⣃⣄⣅⣆⣇⣈⣉⣊⣋⣌⣍⣎⣏⣐⣑⣒⣓⣔⣕⣖⣗⣘⣙⣚⣛⣜⣝⣞⣟⣠⣡⣢⣣⣤⣥⣦⣧⣨⣩⣪⣫⣬⣭⣮⣯⣰⣱⣲⣳⣴⣵⣶⣷⣸⣹⣺⣻⣼⣽⣾⣿')
+        color = random.choice([
+            Color.parse("rgb(91, 62, 31)"),
+            Color.parse("rgb(139, 69, 19)"),
+            Color.parse("rgb(160, 82, 45)"),
+            Color.parse("rgb(205, 133, 63)"),
+            Color.parse("rgb(222, 184, 135)"),
+        ])
+        super().__init__(x, y, symbol, color, Color.parse("rgb(43, 25, 22)"))
+
+    def move(self):
+        return
+        self.y += 1
+
+        # Settle on the bottom of the tank
+        if self.y > tank_height - 1:
+            self.y = tank_height - 1
 
 class SeaUrchin(Entity):
     def __init__(self, x, y):
@@ -195,13 +217,25 @@ fish = [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for 
 sea_urchins = [SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 seaweed = [Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
 bubbles = []
+ground = []
+
+def ground_height(x: int) -> int:
+    return int(math.sin(x / 10) * 2 + 3)
+
+def generate_ground():
+    ground.clear()
+    for x in range(tank_width):
+        for y in range(tank_height-ground_height(x), tank_height):
+            ground.append(Ground(x, y))
+
+generate_ground()
 
 # Define gradient colors
 light_blue = Color(135, 206, 250)
 dark_blue = Color(25, 25, 112)
 
 def all_entities():
-    return fish + sea_urchins + seaweed + bubbles
+    return fish + sea_urchins + seaweed + bubbles + ground
 
 def entity_at(offset: Offset) -> Entity | None:
     for entity in all_entities():
@@ -246,7 +280,7 @@ class Tank(Widget):
 
             new_x = entity.x
             segments.append(Segment(" " * (new_x - x), bg_style, None))
-            entity_style = bg_style + Style(color=entity.color.rich_color)
+            entity_style = bg_style + Style(color=entity.color.rich_color, bgcolor=entity.bgcolor.rich_color if entity.bgcolor is not None else None)
             entity_segment = Segment(entity.symbol, entity_style, None)
             segments.append(entity_segment)
             entity.symbol_width = entity_segment.cell_length
@@ -287,6 +321,7 @@ class FishTankApp(App):
         global tank_width, tank_height
         tank_width = event.size.width
         tank_height = event.size.height
+        generate_ground()
 
     def compose(self) -> ComposeResult:
         yield Tank()
