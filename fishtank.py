@@ -31,9 +31,24 @@ class Entity:
         self.symbol_width = 0 # calculated when rendering
         self.color = color
         self.bgcolor = bgcolor
+        self.solid = solid
+        self.add_to_lists()
+
+    def add_to_lists(self):
         Entity.all_entities.append(self)
-        if solid:
+        if self.solid:
             Entity.solid_entities.append(self)
+        self.__class__.instances.append(self)
+
+    def remove_from_lists(self):
+        Entity.all_entities.remove(self)
+        if self in Entity.solid_entities:
+            Entity.solid_entities.remove(self)
+        self.__class__.instances.remove(self)
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls.instances = []
 
     def move(self):
         pass
@@ -102,7 +117,7 @@ class Fish(Entity):
 
         # Create bubbles occasionally
         if self.bubble_timer <= 0 and random.random() < 0.1:
-            bubbles.append(Bubble(self.x, self.y - 1))
+            Bubble(self.x, self.y - 1)
             self.bubble_timer = 5
         else:
             self.bubble_timer -= 1
@@ -207,9 +222,7 @@ class Seaweed(Sinker):
         # Create new seaweed above if there is room
         growth_rate = 0.01
         if self.y > 0 and random.random() < growth_rate and self.seaweed_above is None:
-            new_seaweed = Seaweed(self.x, self.y - 1, self)
-            seaweed.append(new_seaweed)
-            self.seaweed_above = new_seaweed
+            self.seaweed_above = Seaweed(self.x, self.y - 1, self)
 
 class Bubble(Entity):
     def __init__(self, x, y):
@@ -226,28 +239,26 @@ class Bubble(Entity):
 
         # Remove the bubble if it reaches the top of the tank
         if self.y < 0:
-            bubbles.remove(self)
-            Entity.all_entities.remove(self)
+            self.remove_from_lists()
 
 # Initialize the entities
-fish = [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-sea_urchins = [SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-bottom_dwellers = [BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-coral = [Coral(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-shells = [Shell(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-rocks = [Rock(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-seaweed = [Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
-bubbles = []
-ground = []
+[Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[Coral(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[Shell(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[Rock(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
 
 def ground_height(x: int) -> int:
     return 4 + int(2 * math.sin(x / 10) + 1 * math.sin(x / 5) + 1 * math.sin(x / 2))
 
 def generate_ground():
-    ground.clear()
+    for ground in list(Ground.instances):
+        ground.remove_from_lists()
     for x in range(tank_width):
         for y in range(tank_height-ground_height(x), tank_height):
-            ground.append(Ground(x, y))
+            Ground(x, y)
 
 generate_ground()
 
@@ -320,7 +331,7 @@ class Tank(Widget):
         if self.dragging is not None:
             self.drag_offset = event.offset - Offset(self.dragging.x, self.dragging.y)
         else:
-            bubbles.append(Bubble(event.offset.x, event.offset.y))
+            Bubble(event.offset.x, event.offset.y)
 
     def on_mouse_up(self, event: events.MouseUp) -> None:
         self.release_mouse()
@@ -334,7 +345,7 @@ class Tank(Widget):
             self.dragging.x = event.offset.x - self.drag_offset.x
             self.dragging.y = event.offset.y - self.drag_offset.y
         elif random.random() < 0.5:
-            bubbles.append(Bubble(event.offset.x, event.offset.y))
+            Bubble(event.offset.x, event.offset.y)
 
 class FishTankApp(App):
     def on_resize(self, event: events.Resize) -> None:
