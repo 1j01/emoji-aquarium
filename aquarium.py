@@ -355,7 +355,7 @@ class Tank(Widget):
         elif random.random() < 0.5:
             Bubble(event.offset.x, event.offset.y)
 
-class FishTankApp(App):
+class EmojiAquariumApp(App):
     def on_resize(self, event: events.Resize) -> None:
         global tank_width, tank_height
         
@@ -372,7 +372,7 @@ class FishTankApp(App):
     def compose(self) -> ComposeResult:
         yield Tank()
 
-app = FishTankApp()
+app = EmojiAquariumApp()
 
 # Must be before app.run() which blocks until the app exits.
 # Takes the app in order to do some clean up of the app before restarting.

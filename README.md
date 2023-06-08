@@ -1,9 +1,11 @@
 
-# Terminal Fishtank
+# Emoji Aquarium
+
+A fish tank for your terminal.
 
 Install with `pip install -r requirements.txt`
 
-Run with `python fishtank.py`
+Run with `python aquarium.py`
 
 
 🤿🔱🧜🏻🧜🏼‍♀️🎣⚓  
