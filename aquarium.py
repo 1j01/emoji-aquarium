@@ -138,7 +138,7 @@ class Fish(Entity):
 
 class Ground(Entity):
     def __init__(self, x, y):
-        symbol = random.choice('       .܈܉܇⋰∵⸪∴⸫˙\'⠁⠂⠄⠆⠈⠊⠌⠐⠑⠒⠔⠕⠘⠠⠡⠢⠪⡀⡁⡠⡡⡢⢀⢂')
+        symbol = random.choice('       ࿔𖡎.܈܉܇⋰∵⸪∴⸫˙\'⠁⠂⠄⠆⠈⠊⠌⠐⠑⠒⠔⠕⠘⠠⠡⠢⠪⡀⡁⡠⡡⡢⢀⢂')
         color = random.choice([
             Color.parse("rgb(91, 62, 31)"),
             Color.parse("rgb(139, 69, 19)"),
