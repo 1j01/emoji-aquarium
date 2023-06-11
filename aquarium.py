@@ -31,7 +31,8 @@ class Entity(ABC):
         self.x = x
         self.y = y
         self.symbol = symbol
-        self.symbol_width = 0 # calculated when rendering
+        self.width = 0 # calculated when rendering
+        self.height = 1
         self.color = color
         self.bgcolor = bgcolor
         self.solid = solid
@@ -69,7 +70,7 @@ class Entity(ABC):
             return True
         if entity_at(offset, entities) is not None:
             return True
-        if self.symbol_width > 1 and entity_at(offset + Offset(1, 0), entities) is not None:
+        if self.width > 1 and entity_at(offset + Offset(1, 0), entities) is not None:
             return True
         # Assuming there's no character wider than 2 cells
         return False
@@ -278,7 +279,7 @@ dark_blue = Color(25, 25, 112)
 
 def entity_at(offset: Offset, entities: list[Entity]) -> Entity | None:
     for entity in entities:
-        if entity.x <= offset.x < entity.x + entity.symbol_width and entity.y == offset.y:
+        if entity.x <= offset.x < entity.x + entity.width and entity.y <= offset.y < entity.y + entity.height:
             return entity
     return None
 
@@ -329,7 +330,7 @@ class Tank(Widget):
             entity_style = bg_style + Style(color=entity.color.rich_color, bgcolor=entity.bgcolor.rich_color if entity.bgcolor is not None else None)
             entity_segment = Segment(entity.symbol, entity_style, None)
             segments.append(entity_segment)
-            entity.symbol_width = entity_segment.cell_length
+            entity.width = entity_segment.cell_length
             x = new_x + entity_segment.cell_length
 
         segments.append(Segment(" " * (self.size.width - x), bg_style, None))
