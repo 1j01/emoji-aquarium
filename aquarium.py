@@ -360,7 +360,7 @@ class EmojiAquariumApp(App):
         global tank_width, tank_height
         
         # Move everything up/down to keep things anchored relative to the bottom of the tank.
-        # Do this before re-generating the ground, so that the ground doesn't get offset.
+        # Do this before re-generating the ground, so that the new ground doesn't get offset.
         for entity in Entity.instances:
             entity.y += event.size.height - tank_height
         
