@@ -78,6 +78,13 @@ Human/humanoid (unfortunately gender/skin tone specific variants are not support
                              `-/,////////////|,'
                                  `--._////,,-'   @1j01
 
+## Ideas
+
+- make squid get scared and make ink that then fades away
+- fish schooling behavior
+- food chain
+- sky showing current moon phase
+
 ## License
 
 <p xmlns:dct="http://purl.org/dc/terms/" xmlns:vcard="http://www.w3.org/2001/vcard-rdf/3.0#">
