@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from abc import ABC, abstractmethod
 import math
 import random
 
@@ -19,7 +20,7 @@ tank_width = 80
 tank_height = 24
 
 # Class hierarchy for entities
-class Entity:
+class Entity(ABC):
 
     instances: list['Entity'] = []
     """All instances of this class. This is available on each subclass."""
@@ -60,6 +61,7 @@ class Entity:
         cls.instances = []
         cls.solid_instances = []
 
+    @abstractmethod
     def move(self):
         pass
 
