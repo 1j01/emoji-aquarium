@@ -509,9 +509,6 @@ for _ in range(10):
     Seaweed(*random_pos())
 for _ in range(2):
     Human(*random_pos())
-garden_eel_colony_x = random.randint(0, tank_width)
-for _ in range(5):
-    GardenEel(garden_eel_colony_x + random.randint(-8, 8), tank_height - 1)
 
 def ground_height(x: int) -> int:
     return 4 + int(2 * math.sin(x / 10) + 1 * math.sin(x / 5) + 1 * math.sin(x / 2))
@@ -524,6 +521,11 @@ def generate_ground():
             Ground(x, y)
 
 generate_ground()
+
+garden_eel_colony_x = random.randint(0, tank_width)
+for _ in range(5):
+    eel_x = garden_eel_colony_x + random.randint(-8, 8)
+    GardenEel(eel_x, tank_height - ground_height(eel_x) - 1)
 
 # Define gradient colors
 light_blue = Color(135, 206, 250)
