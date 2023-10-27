@@ -344,7 +344,7 @@ class Bubble(Entity):
 
 class HumanBodyPart(Entity):
     def __init__(self, x: int, y: int, symbol: str, human: 'Human'):
-        super().__init__(x, y, symbol, Color.parse("rgb(255, 255, 0)"), solid=True)
+        super().__init__(x, y, symbol, Color.parse("rgb(255, 255, 0)"), solid=False)
         self.human = human
     def move(self):
         pass
@@ -441,6 +441,15 @@ class Human(Entity):
             self.x = 0
 
         # Position body parts
+        self.position_subparts()
+
+        # Get outside ground if spawned inside it or moved into it
+        for offset in self.parts.keys():
+            if entity_at(Offset(self.x + offset.x, self.y + offset.y), Ground.instances) is not None:
+                self.y -= 1
+                break
+
+    def position_subparts(self):
         for offset, part in self.parts.items():
             part.x = self.x + offset.x
             part.y = self.y + offset.y
@@ -496,9 +505,14 @@ class Tank(Widget):
 
     def update(self):
         # Move entities
-        dragging = self.dragging
+        dragging: list[Entity] = []
+        if self.dragging is not None:
+            dragging = [self.dragging]
+            if isinstance(self.dragging, HumanBodyPart):
+                # dragging = [self.dragging.human, *self.dragging.human.parts.values()]
+                dragging = [self.dragging.human]
         for entity in Entity.instances:
-            if entity is not dragging:
+            if entity not in dragging:
                 entity.move()
         # Update the screen
         self.refresh()
@@ -565,6 +579,10 @@ class Tank(Widget):
         if self.dragging is not None:
             self.dragging.x = event.offset.x - self.drag_offset.x
             self.dragging.y = event.offset.y - self.drag_offset.y
+            if isinstance(self.dragging, HumanBodyPart):
+                self.dragging.human.x = self.dragging.x
+                self.dragging.human.y = self.dragging.y
+                self.dragging.human.position_subparts()
         elif random.random() < 0.5:
             Bubble(event.offset.x, event.offset.y)
 
