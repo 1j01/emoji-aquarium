@@ -393,6 +393,8 @@ class Human(Entity):
         self.vertical_direction = random.choice([-1, 0, 1])
         self.vertical_move_timer = 0
         self.bubble_timer = 0
+        self.attention: Entity | None = None
+        self.seen: set[Entity] = set()
         TEMPLATE: list[list[Type[HumanBodyPart] | None]] = [
             [None, None, HumanHead, None, None],
             [HumanLeftArm, None, HumanTorso, None, HumanRightArm],
@@ -458,6 +460,23 @@ class Human(Entity):
         elif self.x > tank_width - 1:
             self.x = 0
 
+        # Look around
+        if random.random() < 0.05:
+            self.attention = None
+            def distance(entity: Entity) -> float:
+                return math.sqrt((entity.x - self.x) ** 2 + (entity.y - self.y) ** 2)
+            nearby = sorted(Entity.instances, key=distance)
+            nearby = [entity for entity in nearby if distance(entity) < 5]
+            for entity in nearby:
+                if entity not in self.seen and self.finds_interesting(entity):
+                    self.seen.add(entity)
+                    self.attention = entity
+                    self.direction = 0
+                    self.vertical_direction = 0
+                    # Debug: visualize attention (persisting after attention is lost)
+                    # entity.bgcolor = Color.parse("rgb(255, 0, 0)")
+                    break
+
         # Position body parts
         self.position_subparts()
 
@@ -466,6 +485,29 @@ class Human(Entity):
             if entity_at(Offset(self.x + offset.x, self.y + offset.y), Ground.instances) is not None:
                 self.y -= 1
                 break
+
+    def finds_interesting(self, entity: Entity) -> bool:
+        if entity == self:
+            return False
+        if isinstance(entity, Human):
+            return False
+        if isinstance(entity, HumanBodyPart):
+            return False
+        if isinstance(entity, Bubble):
+            return False
+        if isinstance(entity, Ink):
+            return False
+        if isinstance(entity, Shell):
+            return False
+        if isinstance(entity, Rock):
+            return False
+        if isinstance(entity, Seaweed):
+            return False
+        if isinstance(entity, Ground):
+            return False
+        # if isinstance(entity, Coral):
+        #     return False
+        return True
 
     def position_subparts(self):
         for offset, part in self.parts.items():
@@ -484,6 +526,12 @@ class Human(Entity):
                 part.symbol = "🫷" if (time.time() + phase) % 0.5 < 0.25 else "👋" # 🖐️💪
             if isinstance(part, HumanRightArm) and (self.direction == -1 or self.vertical_direction != 0):
                 part.symbol = "🫸" if (time.time() + phase) % 0.5 < 0.25 else "🫳" # 🫱
+            # Point at object with attention
+            if isinstance(part, HumanLeftArm) or isinstance(part, HumanRightArm):
+                if self.attention is not None and self.vertical_direction == 0 and self.direction == 0:
+                    part.symbol = "👈" if self.attention.x < part.x - 1 else "👉" if self.attention.x > part.x + 1 else "👇" if self.attention.y >= part.x else "👆"
+                elif part.symbol in "👈👉👇👆":
+                    part.symbol = "🖐️" # don't keep pointing after moving on
 
 class GardenEel(BottomDweller):
     def __init__(self, x: int, y: int):
