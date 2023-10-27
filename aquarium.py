@@ -3,6 +3,7 @@
 import math
 import random
 from abc import ABC, abstractmethod
+from typing import Type
 
 from rich.segment import Segment
 from rich.style import Style
@@ -27,7 +28,7 @@ class Entity(ABC):
     solid_instances: list['Entity'] = []
     """All instances of this class that are solid. This is available on each subclass."""
 
-    def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None, solid=False):
+    def __init__(self, x: int, y: int, symbol: str, color: Color = Color(255, 255, 255), bgcolor: Color | None = None, solid: bool = False):
         self.x = x
         self.y = y
         self.symbol = symbol
@@ -341,6 +342,109 @@ class Bubble(Entity):
         if self.y < 0:
             self.remove_from_lists()
 
+class HumanBodyPart(Entity):
+    def __init__(self, x: int, y: int, symbol: str, human: 'Human'):
+        super().__init__(x, y, symbol, Color.parse("rgb(255, 255, 0)"), solid=True)
+        self.human = human
+    def move(self):
+        pass
+class HumanHead(HumanBodyPart):
+    pass
+class HumanTorso(HumanBodyPart):
+    pass
+class HumanLeftArm(HumanBodyPart):
+    pass
+class HumanRightArm(HumanBodyPart):
+    pass
+class HumanLeftLeg(HumanBodyPart):
+    pass
+class HumanRightLeg(HumanBodyPart):
+    pass
+
+class Human(Entity):
+    """
+    Human divers use several symbols in a template, with entities for each body part.
+
+    Some of these examples vary from the template, and include extra parts for gear or legs.
+      🤿
+    🫷🧥🫸
+      👖
+     🩴🩴
+
+     ➿🏒
+    /👙\
+     /\
+
+      |
+    🧯🥽
+    💪🩱🫳
+    🦵 🦶
+
+       |
+      ꝏ    ∞ ಹ  ⛽🛢️
+    👋🎽🖖
+      🩳
+      🧦
+    """
+    def __init__(self, x: int, y: int):
+        super().__init__(x, y, '', Color.parse("rgb(255, 255, 0)"))
+        self.direction = random.choice([-1, 1])
+        self.bubble_timer = 0
+        TEMPLATE: list[list[Type[HumanBodyPart] | None]] = [
+            [None, None, HumanHead, None, None],
+            [HumanLeftArm, None, HumanTorso, None, HumanRightArm],
+            [None, HumanLeftLeg, None, HumanRightLeg, None],
+        ]
+        self.parts: dict[Offset, HumanBodyPart] = {}
+        for row in range(len(TEMPLATE)):
+            for col in range(len(TEMPLATE[row])):
+                cls = TEMPLATE[row][col]
+                if cls is not None:
+                    if cls is HumanHead:
+                        part_symbol = random.choice('🤿🥽➿ꝏ∞ಹ')
+                    elif cls is HumanTorso:
+                        part_symbol = random.choice('🧥🩱👙🎽')
+                    elif cls is HumanLeftArm:
+                        part_symbol = random.choice('🫷💪🖖👋')
+                    elif cls is HumanRightArm:
+                        part_symbol = random.choice('🫸🫳🖖👋')
+                    elif cls is HumanLeftLeg or cls is HumanRightLeg:
+                        part_symbol = "🩴"
+                    else:
+                        raise Exception(f"Unknown class for human body part: {cls}")
+
+                    offset = Offset(col - 2, row)
+                    part = cls(self.x + offset.x, self.y + offset.y, part_symbol, self)
+                    self.parts[offset] = part
+
+    def move(self):
+        if self.collision_at(Offset(self.x + self.direction, self.y)):
+            self.direction *= -1
+        else:
+            self.x += self.direction
+
+        # Randomly change direction occasionally
+        if random.random() < 0.05:
+            self.direction *= -1
+
+        # Create bubbles occasionally
+        if self.bubble_timer <= 0 and random.random() < 0.1:
+            Bubble(self.x, self.y - 1)
+            self.bubble_timer = 2
+        else:
+            self.bubble_timer -= 1
+
+        # Wrap around the screen
+        if self.x < 0:
+            self.x = tank_width - 1
+        elif self.x > tank_width - 1:
+            self.x = 0
+
+        # Position body parts
+        for offset, part in self.parts.items():
+            part.x = self.x + offset.x
+            part.y = self.y + offset.y
+
 # Initialize the entities
 def random_pos():
     return random.randint(0, tank_width), random.randint(0, tank_height)
@@ -360,6 +464,8 @@ for _ in range(5):
     Rock(*random_pos())
 for _ in range(10):
     Seaweed(*random_pos())
+for _ in range(2):
+    Human(*random_pos())
 
 def ground_height(x: int) -> int:
     return 4 + int(2 * math.sin(x / 10) + 1 * math.sin(x / 5) + 1 * math.sin(x / 2))
