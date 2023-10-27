@@ -11,7 +11,6 @@
         {"name": "textual", "depth": 5},
         {"name": "rich", "depth": 5},
     ],
-    "css.validate": false,
     // "workbench.colorTheme": "Abyss"
     "workbench.colorTheme": "Tomorrow Night Blue"
 }

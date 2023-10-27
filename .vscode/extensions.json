@@ -1,0 +1,11 @@
+{
+    "recommendations": [
+        "textualize.textual-syntax-highlighter",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "naumovs.color-highlight",
+        "perkovec.emoji",
+        "ms-python.isort",
+        "streetsidesoftware.code-spell-checker"
+    ]
+}
