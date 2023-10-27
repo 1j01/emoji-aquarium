@@ -408,8 +408,12 @@ class Human(Entity):
                         part_symbol = random.choice('🫷💪🖖👋')
                     elif cls is HumanRightArm:
                         part_symbol = random.choice('🫸🫳🖖👋')
-                    elif cls is HumanLeftLeg or cls is HumanRightLeg:
-                        part_symbol = "🩴"
+                    # elif cls is HumanLeftLeg or cls is HumanRightLeg:
+                    #     part_symbol = "🩴"
+                    elif cls is HumanLeftLeg:
+                        part_symbol = random.choice('🦵')
+                    elif cls is HumanRightLeg:
+                        part_symbol = random.choice('🦶')
                     else:
                         raise Exception(f"Unknown class for human body part: {cls}")
 
