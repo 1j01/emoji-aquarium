@@ -426,6 +426,12 @@ class Human(Entity):
                     part = cls(self.x + offset.x, self.y + offset.y, part_symbol, self)
                     self.parts[offset] = part
 
+    def collision_at(self, human_offset: Offset) -> bool:
+        for part_offset, part in self.parts.items():
+            if part.collision_at(human_offset + part_offset):
+                return True
+        return False
+
     def move(self):
         if self.collision_at(Offset(self.x + self.direction, self.y)):
             self.direction *= -1
@@ -481,10 +487,8 @@ class Human(Entity):
         self.position_subparts()
 
         # Get outside ground if spawned inside it or moved into it
-        for offset in self.parts.keys():
-            if entity_at(Offset(self.x + offset.x, self.y + offset.y), Ground.instances) is not None:
-                self.y -= 1
-                break
+        if self.collision_at(Offset(self.x, self.y)):
+            self.y -= 1
 
     def finds_interesting(self, entity: Entity) -> bool:
         if entity == self:
