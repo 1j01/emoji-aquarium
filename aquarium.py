@@ -183,7 +183,7 @@ class Cephalopod(BottomDweller):
         if self.hunting is not None and self.hunting.x == self.x and self.hunting.y == self.y:
             self.hunting.remove_from_lists()
             self.hunting = None
-    
+
     def is_predator(self, entity: Entity) -> bool:
         if entity == self:
             return False
@@ -192,12 +192,12 @@ class Cephalopod(BottomDweller):
         if entity.symbol in "🦈🐊🐉🐲🐳🐋🐙🦑🐧🦭🦦":
             return True
         return False
-    
+
     def is_prey(self, entity: Entity) -> bool:
         if entity == self:
             return False
         return entity.symbol in "🐟🐠🦐🦀🦞🐙🦑🦪🐌🪼🍤🍣"
-    
+
     def ink(self):
         Ink(self.x, self.y, self.ink_color)
 
@@ -298,7 +298,7 @@ class Seaweed(Sinker):
         # Apply gravity to bottom-most seaweed
         if self.seaweed_below is None:
             super().move()
-        
+
         # Wiggle back and forth, within 1 space of the seaweed below and above
         if self.seaweed_below is not None:
             new_x = self.x + random.randint(-1, 1)
@@ -628,15 +628,15 @@ class Tank(Widget):
 class EmojiAquariumApp(App):
     def on_resize(self, event: events.Resize) -> None:
         global tank_width, tank_height
-        
+
         # Move everything up/down to keep things anchored relative to the bottom of the tank.
         # Do this before re-generating the ground, so that the new ground doesn't get offset.
         for entity in Entity.instances:
             entity.y += event.size.height - tank_height
-        
+
         tank_width = event.size.width
         tank_height = event.size.height
-        
+
         generate_ground()
 
     def compose(self) -> ComposeResult:

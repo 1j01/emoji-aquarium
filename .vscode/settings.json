@@ -1,6 +1,9 @@
 {
+    // Code style
     "editor.insertSpaces": true,
     "editor.tabSize": 4,
+    "files.trimTrailingWhitespace": true,
+    // Auto-imports
     "python.analysis.packageIndexDepths": [
         // The default depth is 1 (top-level only),
         // which doesn't let auto-imports work for Textual,
@@ -11,6 +14,7 @@
         {"name": "textual", "depth": 5},
         {"name": "rich", "depth": 5},
     ],
+    // Oceanic vibes
     // "workbench.colorTheme": "Abyss"
     "workbench.colorTheme": "Tomorrow Night Blue"
 }
