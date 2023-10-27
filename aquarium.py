@@ -389,7 +389,9 @@ class Human(Entity):
     """
     def __init__(self, x: int, y: int):
         super().__init__(x, y, '', Color.parse("rgb(255, 255, 0)"))
-        self.direction = random.choice([-1, 1])
+        self.direction = random.choice([-1, 0, 1])
+        self.vertical_direction = random.choice([-1, 0, 1])
+        self.vertical_move_timer = 0
         self.bubble_timer = 0
         TEMPLATE: list[list[Type[HumanBodyPart] | None]] = [
             [None, None, HumanHead, None, None],
@@ -427,10 +429,20 @@ class Human(Entity):
             self.direction *= -1
         else:
             self.x += self.direction
+        if self.vertical_direction != 0:
+            self.vertical_move_timer -= 1
+            if self.vertical_move_timer <= 0:
+                self.vertical_move_timer = 10
+                if self.collision_at(Offset(self.x, self.y + self.vertical_direction)):
+                    self.vertical_direction = 0
+                else:
+                    self.y += self.vertical_direction
 
         # Randomly change direction occasionally
         if random.random() < 0.05:
-            self.direction *= -1
+            self.direction = random.choice([-1, 0, 1])
+        if random.random() < 0.05:
+            self.vertical_direction = random.choice([-1, 0, 1])
 
         # Create bubbles regularly, in bursts
         if self.bubble_timer <= 6:
@@ -465,13 +477,13 @@ class Human(Entity):
                     part.x += 1 if offset.x > 0 else -1
             # Animate arms
             if isinstance(part, HumanLeftArm) or isinstance(part, HumanRightArm):
-                if time.time() % 0.5 < 0.25:
+                if time.time() % 0.5 < 0.25 and self.vertical_direction != 0:
                     part.y -= 1
-            if isinstance(part, HumanLeftArm):
-                # part.symbol = "🫷" if time.time() % 0.5 < 0.25 else "💪" # pretty funny flexing arm
-                part.symbol = "🫷" if (time.time() + 0.4) % 0.5 < 0.25 else "👋" # pretty stupid 🖐️
-            if isinstance(part, HumanRightArm):
-                part.symbol = "🫸" if (time.time() + 0.4) % 0.5 < 0.25 else "🫳" # 🫱
+            phase = 0.1 if self.vertical_direction == 1 else 0.4
+            if isinstance(part, HumanLeftArm) and (self.direction == 1 or self.vertical_direction != 0):
+                part.symbol = "🫷" if (time.time() + phase) % 0.5 < 0.25 else "👋" # 🖐️💪
+            if isinstance(part, HumanRightArm) and (self.direction == -1 or self.vertical_direction != 0):
+                part.symbol = "🫸" if (time.time() + phase) % 0.5 < 0.25 else "🫳" # 🫱
 
 class GardenEel(BottomDweller):
     def __init__(self, x: int, y: int):
