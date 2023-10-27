@@ -496,7 +496,7 @@ class Tank(Widget):
 
     def update(self):
         # Move entities
-        dragging = app.query_one(Tank).dragging
+        dragging = self.dragging
         for entity in Entity.instances:
             if entity is not dragging:
                 entity.move()
