@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-from abc import ABC, abstractmethod
 import math
 import random
+from abc import ABC, abstractmethod
 
 from rich.segment import Segment
 from rich.style import Style
 from textual import events
 from textual.app import App, ComposeResult
 from textual.color import Color
-from textual.strip import Strip
-from textual.widget import Widget
 from textual.geometry import Offset
 from textual.reactive import var
+from textual.strip import Strip
+from textual.widget import Widget
 
 from auto_restart import restart_on_changes
 
