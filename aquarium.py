@@ -3,6 +3,7 @@
 import math
 import random
 from abc import ABC, abstractmethod
+import time
 from typing import Type
 
 from rich.segment import Segment
@@ -457,6 +458,10 @@ class Human(Entity):
         for offset, part in self.parts.items():
             part.x = self.x + offset.x
             part.y = self.y + offset.y
+            if isinstance(part, HumanLeftLeg) or isinstance(part, HumanRightLeg):
+                # Move legs to animate swimming
+                if time.time() % 0.5 < 0.25:
+                    part.x += 1 if offset.x > 0 else -1
 
 # Initialize the entities
 def random_pos():
