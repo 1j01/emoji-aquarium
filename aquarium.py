@@ -463,6 +463,15 @@ class Human(Entity):
                 # Move legs to animate swimming
                 if time.time() % 0.5 < 0.25:
                     part.x += 1 if offset.x > 0 else -1
+            # Animate arms
+            if isinstance(part, HumanLeftArm) or isinstance(part, HumanRightArm):
+                if time.time() % 0.5 < 0.25:
+                    part.y -= 1
+            if isinstance(part, HumanLeftArm):
+                # part.symbol = "🫷" if time.time() % 0.5 < 0.25 else "💪" # pretty funny flexing arm
+                part.symbol = "🫷" if (time.time() + 0.1) % 0.5 < 0.25 else "👋" # pretty stupid 🖐️
+            if isinstance(part, HumanRightArm):
+                part.symbol = "🫸" if (time.time() + 0.1) % 0.5 < 0.25 else "🫳" # 🫱
 
 # Initialize the entities
 def random_pos():
