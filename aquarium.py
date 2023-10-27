@@ -38,20 +38,22 @@ class Entity:
 
     def add_to_lists(self):
         for cls in self.__class__.mro():
-            cls.instances.append(self)
-            if self.solid:
-                cls.solid_instances.append(self)
-            if cls is Entity:
-                break
+            if issubclass(cls, Entity):
+                cls.instances.append(self)
+                if self.solid:
+                    cls.solid_instances.append(self)
+                if cls is Entity:
+                    break
 
     def remove_from_lists(self):
         for cls in self.__class__.mro():
-            if self in cls.instances:
-                cls.instances.remove(self)
-            if self in cls.solid_instances:
-                cls.solid_instances.remove(self)
-            if cls is Entity:
-                break
+            if issubclass(cls, Entity):
+                if self in cls.instances:
+                    cls.instances.remove(self)
+                if self in cls.solid_instances:
+                    cls.solid_instances.remove(self)
+                if cls is Entity:
+                    break
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
