@@ -338,14 +338,24 @@ class Bubble(Entity):
             self.remove_from_lists()
 
 # Initialize the entities
-[Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-[SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-[BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(2)]
-[Cephalopod(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(2)]
-[Coral(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-[Shell(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-[Rock(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-[Seaweed(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(10)]
+def random_pos():
+    return random.randint(0, tank_width), random.randint(0, tank_height)
+for _ in range(5):
+    Fish(*random_pos())
+for _ in range(5):
+    SeaUrchin(*random_pos())
+for _ in range(2):
+    BottomDweller(*random_pos())
+for _ in range(2):
+    Cephalopod(*random_pos())
+for _ in range(5):
+    Coral(*random_pos())
+for _ in range(5):
+    Shell(*random_pos())
+for _ in range(5):
+    Rock(*random_pos())
+for _ in range(10):
+    Seaweed(*random_pos())
 
 def ground_height(x: int) -> int:
     return 4 + int(2 * math.sin(x / 10) + 1 * math.sin(x / 5) + 1 * math.sin(x / 2))
