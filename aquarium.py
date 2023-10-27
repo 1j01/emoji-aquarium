@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import math
+import os
 import random
 from abc import ABC, abstractmethod
 
@@ -16,8 +17,12 @@ from textual.widget import Widget
 
 from auto_restart import restart_on_changes
 
+# These metrics will be updated when the terminal is resized.
 tank_width = 80
 tank_height = 24
+
+# This is useful to see the widths of the entities. It's incredibly gaudy.
+RANDOM_BG_COLORS = os.environ.get('RANDOM_BG_COLORS', '0') == '1'
 
 # Class hierarchy for entities
 class Entity(ABC):
@@ -33,6 +38,18 @@ class Entity(ABC):
         self.symbol = symbol
         self.width = 0 # calculated when rendering
         self.height = 1
+        if RANDOM_BG_COLORS:
+            bgcolor = random.choice([
+                Color.parse("rgb(198, 21, 21)"),
+                Color.parse("rgb(255, 132, 0)"),
+                Color.parse("rgb(255, 213, 0)"),
+                Color.parse("rgb(123, 255, 0)"),
+                Color.parse("rgb(0, 255, 102)"),
+                Color.parse("rgb(0, 255, 255)"),
+                Color.parse("rgb(0, 153, 255)"),
+                Color.parse("rgb(89, 0, 255)"),
+                Color.parse("rgb(239, 0, 239)"),
+            ])
         self.color = color
         self.bgcolor = bgcolor
         self.solid = solid
