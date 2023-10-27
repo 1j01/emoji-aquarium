@@ -402,7 +402,7 @@ class Human(Entity):
                 cls = TEMPLATE[row][col]
                 if cls is not None:
                     if cls is HumanHead:
-                        part_symbol = random.choice('🤿🥽➿ꝏ∞ಹ')
+                        part_symbol = random.choice('🤿🥽➿ꝏ∞ಹ😎')
                     elif cls is HumanTorso:
                         part_symbol = random.choice('🧥🩱👙🎽')
                     elif cls is HumanLeftArm:
