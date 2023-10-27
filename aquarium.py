@@ -432,10 +432,11 @@ class Human(Entity):
         if random.random() < 0.05:
             self.direction *= -1
 
-        # Create bubbles occasionally
-        if self.bubble_timer <= 0 and random.random() < 0.1:
+        # Create bubbles regularly, in bursts
+        if self.bubble_timer <= 6:
             Bubble(self.x, self.y - 1)
-            self.bubble_timer = 2
+        if self.bubble_timer <= 0:
+            self.bubble_timer = 20
         else:
             self.bubble_timer -= 1
 
