@@ -469,9 +469,9 @@ class Human(Entity):
                     part.y -= 1
             if isinstance(part, HumanLeftArm):
                 # part.symbol = "🫷" if time.time() % 0.5 < 0.25 else "💪" # pretty funny flexing arm
-                part.symbol = "🫷" if (time.time() + 0.1) % 0.5 < 0.25 else "👋" # pretty stupid 🖐️
+                part.symbol = "🫷" if (time.time() + 0.4) % 0.5 < 0.25 else "👋" # pretty stupid 🖐️
             if isinstance(part, HumanRightArm):
-                part.symbol = "🫸" if (time.time() + 0.1) % 0.5 < 0.25 else "🫳" # 🫱
+                part.symbol = "🫸" if (time.time() + 0.4) % 0.5 < 0.25 else "🫳" # 🫱
 
 # Initialize the entities
 def random_pos():
