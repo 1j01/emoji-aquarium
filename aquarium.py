@@ -86,8 +86,9 @@ class Sinker(Entity):
 class BottomDweller(Sinker):
     # def __init__(self, x, y, symbol, color=Color(255, 255, 255), bgcolor=None):
     #     super().__init__(x, y, symbol, color, bgcolor)
-    def __init__(self, x, y):
-        symbol = random.choice('🦞🐌🦐🦀🦑🐙')
+    def __init__(self, x, y, symbol = None):
+        if symbol is None:
+            symbol = random.choice('🦞🐌🦐🦀')
         super().__init__(x, y, symbol)
         self.direction = random.choice([-1, 1])
 
@@ -106,6 +107,93 @@ class BottomDweller(Sinker):
             # Randomly change direction occasionally
             if random.random() < 0.05:
                 self.direction *= -1
+
+class Ink(Entity):
+    def __init__(self, x, y, color, opacity=1.0):
+        super().__init__(x, y, '▓', color)
+        self.opaque_color = color
+        self.opacity = opacity
+
+    def move(self):
+        self.color = self.opaque_color.with_alpha(self.opacity)
+        self.opacity -= 0.01
+        if self.opacity <= 0:
+            self.remove_from_lists()
+        # Spread out
+        if self.opacity > 0.3:
+            for offset in [Offset(0, 1), Offset(0, -1), Offset(1, 0), Offset(-1, 0)]:
+                spread_pos = Offset(self.x, self.y) + offset
+                # if entity_at(spread_pos, Ink.instances) is None:
+                if entity_at(spread_pos, Entity.instances) is None:
+                    Ink(spread_pos.x, spread_pos.y, self.opaque_color, self.opacity - 0.3)
+
+class Cephalopod(BottomDweller):
+    def __init__(self, x, y):
+        symbol = random.choice('🦑🐙')
+        super().__init__(x, y, symbol)
+        self.ink_color = Color.parse("rgb(0, 0, 0)") if symbol == '🐙' else Color.parse("rgb(0, 0, 100)")
+        self.ink_timer = 0
+        self.hunting = None
+        self.scared = False
+
+    def move(self):
+        super().move()
+        # Look for predators
+        def distance(entity: Entity) -> float:
+            return math.sqrt((entity.x - self.x) ** 2 + (entity.y - self.y) ** 2)
+        nearby = sorted(Entity.instances, key=distance)
+        nearby = [entity for entity in nearby if distance(entity) < 5]
+        if random.random() < 0.1:
+            for entity in nearby:
+                if self.is_predator(entity):
+                    self.ink()
+                    self.scared = True
+                    # Run away
+                    self.hunting = None
+                    if entity.x < self.x:
+                        self.direction = 1
+                    elif entity.x > self.x:
+                        self.direction = -1
+                    break
+        # Look for prey
+        if random.random() < 0.1:
+            for entity in nearby:
+                if self.is_prey(entity):
+                    self.hunting = entity
+                    break
+        # Move towards prey
+        if self.hunting is not None:
+            if self.hunting.x < self.x:
+                self.direction = -1
+            elif self.hunting.x > self.x:
+                self.direction = 1
+            else:
+                self.direction = random.choice([-1, 1])
+            if self.collision_at(Offset(self.x + self.direction, self.y)):
+                self.hunting = None
+            else:
+                self.x += self.direction
+        # Eat prey
+        if self.hunting is not None and self.hunting.x == self.x and self.hunting.y == self.y:
+            self.hunting.remove_from_lists()
+            self.hunting = None
+    
+    def is_predator(self, entity: Entity) -> bool:
+        if entity == self:
+            return False
+        if isinstance(entity, Cephalopod):
+            return True
+        if entity.symbol in "🦈🐊🐉🐲🐳🐋🐙🦑🐧🦭🦦":
+            return True
+        return False
+    
+    def is_prey(self, entity: Entity) -> bool:
+        if entity == self:
+            return False
+        return entity.symbol in "🐟🐠🦐🦀🦞🐙🦑🦪🐌🪼🍤🍣"
+    
+    def ink(self):
+        Ink(self.x, self.y, self.ink_color)
 
 class Fish(Entity):
     def __init__(self, x, y):
@@ -252,7 +340,8 @@ class Bubble(Entity):
 # Initialize the entities
 [Fish(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 [SeaUrchin(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
-[BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
+[BottomDweller(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(2)]
+[Cephalopod(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(2)]
 [Coral(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 [Shell(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
 [Rock(random.randint(0, tank_width), random.randint(0, tank_height)) for _ in range(5)]
@@ -324,7 +413,11 @@ class Tank(Widget):
 
             new_x = entity.x
             segments.append(Segment(" " * (new_x - x), bg_style, None))
-            entity_style = bg_style + Style(color=entity.color.rich_color, bgcolor=entity.bgcolor.rich_color if entity.bgcolor is not None else None)
+            # Alpha is supported for foreground colors, but not background colors currently,
+            # used for Ink entities.
+            ent_fg = entity.color.blend(bg_color, 1 - entity.color.a).rich_color
+            ent_bg = entity.bgcolor.rich_color if entity.bgcolor is not None else None
+            entity_style = bg_style + Style(color=ent_fg, bgcolor=ent_bg)
             entity_segment = Segment(entity.symbol, entity_style, None)
             segments.append(entity_segment)
             entity.symbol_width = entity_segment.cell_length

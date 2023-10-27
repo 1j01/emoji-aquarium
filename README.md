@@ -80,7 +80,7 @@ Human/humanoid (unfortunately gender/skin tone specific variants are not support
 
 ## Ideas
 
-- make squid get scared and make ink that then fades away
+- make squid get scared and make ink that then fades away - DONE
 - fish schooling behavior
 - food chain
 - sky showing current moon phase
