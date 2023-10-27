@@ -473,6 +473,22 @@ class Human(Entity):
             if isinstance(part, HumanRightArm):
                 part.symbol = "🫸" if (time.time() + 0.4) % 0.5 < 0.25 else "🫳" # 🫱
 
+class GardenEel(Sinker):
+    def __init__(self, x: int, y: int):
+        super().__init__(x, y, 'S') # 🪱𓆙〰️〰𓆓〽𓆑
+
+    def move(self):
+        super().move()
+        # If we're on the ground, "burrow" into it
+        # (by staying put and changing symbol)
+        # if self.collision_at(Offset(self.x, self.y + 1)):
+        if entity_at(Offset(self.x, self.y + 1), Ground.instances):
+            if random.random() < 0.1:
+                self.symbol = random.choice('()⎛⎞/\\|,')
+        else:
+            self.symbol = 'S'
+
+
 # Initialize the entities
 def random_pos():
     return random.randint(0, tank_width), random.randint(0, tank_height)
@@ -494,6 +510,9 @@ for _ in range(10):
     Seaweed(*random_pos())
 for _ in range(2):
     Human(*random_pos())
+garden_eel_colony_x = random.randint(0, tank_width)
+for _ in range(5):
+    GardenEel(garden_eel_colony_x + random.randint(-8, 8), tank_height - 1)
 
 def ground_height(x: int) -> int:
     return 4 + int(2 * math.sin(x / 10) + 1 * math.sin(x / 5) + 1 * math.sin(x / 2))
