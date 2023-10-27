@@ -473,20 +473,19 @@ class Human(Entity):
             if isinstance(part, HumanRightArm):
                 part.symbol = "🫸" if (time.time() + 0.4) % 0.5 < 0.25 else "🫳" # 🫱
 
-class GardenEel(Sinker):
+class GardenEel(BottomDweller):
     def __init__(self, x: int, y: int):
         super().__init__(x, y, 'S') # 🪱𓆙〰️〰𓆓〽𓆑
 
     def move(self):
-        super().move()
-        # If we're on the ground, "burrow" into it
-        # (by staying put and changing symbol)
-        # if self.collision_at(Offset(self.x, self.y + 1)):
+        # If we're on the ground (and not just any solid entity),
+        # "burrow" into it (by staying put and changing symbol)
         if entity_at(Offset(self.x, self.y + 1), Ground.instances):
             if random.random() < 0.1:
                 self.symbol = random.choice('()⎛⎞/\\|,')
         else:
             self.symbol = 'S'
+            super().move()
 
 
 # Initialize the entities
